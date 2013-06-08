@@ -25,6 +25,7 @@ setup(name='ade25.fabfiles',
       install_requires=[
           'setuptools',
           'Fabric',
+          'cuisine',
           # -*- Extra requirements: -*-
       ],
       entry_points="""
