@@ -11,7 +11,7 @@ def err(msg):
 @task
 def configure_fs():
     """ Configure filesystem structure """
-    run('mkdir ./sites')
+    dir_ensure('/opt/sites')
 
 
 def set_hostname(server_ip=None, hostname=None):
