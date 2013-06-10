@@ -10,14 +10,14 @@ def update():
 
 @task
 def build():
-    """ Run buildout deployment profile """
+    """ Buildout deployment profile (no update) """
     with cd(env.code_root):
         run('bin/buildout -Nc deployment.cfg')
 
 
 @task
 def build_full():
-    """ Run buildout deployment profile and enforce updates """
+    """ Buildout deployment profile (full) """
     with cd(env.code_root):
         run('bin/buildout -c deployment.cfg')
 
