@@ -3,9 +3,9 @@ from fabric.api import task
 from fabric.api import local
 from fabric.api import sudo
 from fabric.api import get
-from fabric.api import exists
 from fabric.api import cd
-from fabric.api import confirm
+from fabric.contrib.console import confirm
+from fabric.contrib.files import exists
 
 
 @task
