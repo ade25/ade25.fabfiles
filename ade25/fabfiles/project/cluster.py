@@ -9,3 +9,18 @@ def restart_custer():
     with cd(env.webserver):
         for site in env.sites:
             run('nice bin/supervisorctl restart instance-%s' % site)
+
+
+@task
+def restart_zeoserver():
+    with cd(env.webserver):
+        run('nice bin/supervisorctl restart zeoserver')
+
+
+@task
+def restart_clients():
+    with cd(env.webserver):
+        run('nice bin/supervisorctl restart instance1')
+        run('nice bin/supervisorctl restart instance2')
+        run('nice bin/supervisorctl restart instance3')
+        run('nice bin/supervisorctl restart instance4')
