@@ -13,21 +13,21 @@ def restart_all():
 
 @task
 def restart_nginx():
-    """ Restart all """
+    """ Restart Nginx """
     with cd(env.webserver):
         run('nice bin/supervisorctl restart nginx')
 
 
 @task
 def restart_varnish():
-    """ Restart all """
+    """ Restart Varnish """
     with cd(env.webserver):
         run('nice bin/supervisorctl restart varnish')
 
 
 @task
 def restart_haproxy():
-    """ Restart all """
+    """ Restart HAProxy """
     with cd(env.webserver):
         run('nice bin/supervisorctl restart haproxy')
 

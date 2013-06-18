@@ -30,10 +30,10 @@ def apply_hotfix(sitename=None, addon=None):
 
 
 @task
-def prepare_sites(sites, addon=None, filename='packages.cfg'):
+def prepare_sites(addon=None, filename='packages.cfg'):
     """ Prepare each hosted site by updating the buildout configuration """
     msg = 'Add %s to %s' % (addon, filename)
-    for site in sites:
+    for site in env.hosted_sites:
         run('nice git pull')
         update_package_list(
             filename=filename,
