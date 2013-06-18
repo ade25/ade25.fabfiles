@@ -5,20 +5,28 @@ from fabric.api import env
 from fabric.api import task
 from fabric.api import cd
 from fabric.api import run
-from fabric.api import execute
 
 
 @task
-def process_hotfix(sitename=None, addon=None):
+def process_hotfix(addon=None):
+    """ Process hotefix for all hosted sites """
+    for site in env.hosted_sites:
+        apply_hotfix(
+            sitename=site,
+            addon=addon
+        )
+        print 'Processed hotfix for %s' % site
+
+
+@task
+def apply_hotfix(sitename=None, addon=None):
     """ Hotfix a single site/buildout """
     if sitename is None:
         print('A sitename is required')
     else:
         path = ('/opt/sites/%s/buildout.%s' % (sitename, sitename))
         with cd(path):
-            pkg = addon
-            execute(update_package_list(addon=pkg))
-            run('bin/buildout -N -c deployment.cfg')
+            run('bin/buildout -Nc deployment.cfg')
 
 
 @task

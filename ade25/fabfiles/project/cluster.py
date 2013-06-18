@@ -7,7 +7,7 @@ from fabric.api import run
 @task
 def restart_cluster():
     with cd(env.webserver):
-        for site in env.sites:
+        for site in env.hosted_sites:
             run('nice bin/supervisorctl restart instance-%s' % site)
 
 
