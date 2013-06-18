@@ -22,10 +22,25 @@ def process_hotfix(sitename=None, addon=None):
 
 
 @task
+def prepare_sites(sites, addon=None, filename='packages.cfg'):
+    """ Prepare each hosted site by updating the buildout configuration """
+    msg = 'Add %s to %s' % (addon, filename)
+    for site in sites:
+        run('nice git pull')
+        update_package_list(
+            filename=filename,
+            addon=addon,
+            site=site
+        )
+        run('nice git add %s' % filename)
+        run('nice git commit -m %s' % msg)
+
+
+@task
 def update_package_list(filename='packages.cfg', addon=None, site='Plone'):
     """ Append package to buildout eggs
 
-        @param filename: the configuration file to updated
+        @param filename: the configuration file to update
         @param addon: the package name to append
         @param site: name of the site to be updated
     """
