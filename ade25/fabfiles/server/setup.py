@@ -112,7 +112,7 @@ def configure_egg_cache():
         run('rm -rf %s/default.cfg' % eggcache)
 
     run('touch %s/default.cfg' % eggcache)
-    run('echo "[buildout]" >> /etc/buildout/default.cfg')
+    run('echo "[buildout]" >> /opt/buildout-cache/default.cfg')
     run('echo "eggs-directory = %s/eggs" >> %s/default.cfg' % (eggcache,
         eggcache))
     run('echo "download-cache = %s/downloads" >> %s/default.cfg' % (eggcache,
