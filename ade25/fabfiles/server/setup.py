@@ -157,3 +157,15 @@ def generate_selfsigned_ssl(hostname=None):
         '-in server.csr -signkey server.key -out server.crt')
     run('cp server.crt %(webserver)s/etc/%(hostname)s.crt' % opts)
     run('cp server.key %(webserver)s/etc/%(hostname)s.key' % opts)
+
+
+@task
+def configure_global_git_user(username=None, email=None):
+    """ Setup global git user name for remote commits (needed for hotfixes)
+    """
+    opts = dict(
+        username=username or env.get('git_username') or 'Christoph Boehner',
+        email=email or env.get('email') or 'cb@vorwaerts-werbung.de'
+    )
+    run('git config --global user.name "%(username)s"' % opts)
+    run('git config --global user.name "%(email)s"' % opts)

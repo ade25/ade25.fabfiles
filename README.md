@@ -17,7 +17,7 @@ def prepare_new_machine(self):
 
 These tasks are meant to be compiled into application specific common actions:
 
-```python
+``` python
 from a25.fabfiles import project
 
 @task
@@ -91,5 +91,41 @@ Available commands:
     server.status.status                  Server status information
     server.status.supervisor              Server supervisord process status
     server.status.uptime                  Server uptime
+```
+
+
+Hotfixes
+========
+
+This collection of fabfiles tries to deal with the special case of a pending
+hotfix in a graceful way. We asume that all sites are hosted on a specific
+Xen domU and therefore share a common configuration and are controlled by a
+central webserver buildout based on the 'ade25.webserver' skeleton.
+
+Note:
+
+Processing an automatic hotfix requires the host to be setup accordingly.
+Please make sure that you have a valid 'git' user configured since the fabfile
+tries to to keep your remote checkout clean and will attempt to commit the
+updated/patched configuration files upon upload.
+
+If you do not have a git user configured, you can do the following:
+
+``` python
+from ade25.fabfiles.server import setup
+
+def add_gituser():
+    setup.configure_global_git_user(
+        username='John Doe',
+        email='john@doe.tld'
+    )
+```
+
+The webserver blueprint buildout should already have you set up to process a
+hotfix otherwise. So grap a single malt, gather some patience and simply
+invoke:
+
+```bash
+bin/fab hotfix:Product.PloneHotfixXXXXXXX
 ```
 

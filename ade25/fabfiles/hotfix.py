@@ -6,17 +6,25 @@ from fabric.api import env
 from fabric.api import task
 from fabric.api import cd
 from fabric.api import run
+from fabric.api import local
+
+from fabric.operations import get
+from fabric.contrib.files import upload_template
+from fabric.contrib.files import contains
 
 
 @task
 def process_hotfix(addon=None):
     """ Process hotfix for all hosted sites """
+    idx = 0
     for site in env.hosted_sites:
         apply_hotfix(
             sitename=site,
             addon=addon
         )
         print 'Processed hotfix for %s' % site
+        idx += 1
+    print 'Hotfixed %s sites on %s' % (idx, env.hostname)
 
 
 @task
@@ -39,26 +47,31 @@ def prepare_sites(addonpkg=None, filename='packages.cfg'):
     """
     for site in env.site_locations:
         msg = 'Add %s' % addonpkg
-        path = '%s/%s/buildout.%s' % (env.host_root, site, site)
         with cd(site):
-            run('nice git pull')
-            cfg = file_read('packages.cfg')
-            config_parser = ConfigParser(dict_type=OrderedDict)
-            config_parser.read(cfg)
-            import pdb; pdb.set_trace( )
-            egglist = config_parser.get('eggs', 'addon')
-            new_list = egglist + '\n%s' % addonpkg
-            config_parser.set('eggs', 'addon', new_list)
-            for x in config_parser.sections():
-                for name, value in config_parser.items(x):
-                    print '  %s = %r' % (name, value)
-            with open(filename, 'wb') as configfile:
-                config_parser.write(configfile)
-            print 'Egglist for %s successfully updated' % site
-            run('nice git add %s' % filename)
-            commit = run('nice git commit -m "%s"' % msg)
-            if commit.failed:
-                print 'Could not commit changes'
+            if contains('packages.cfg', addonpkg, exact=False):
+                print '%s site already done' % site
+            else:
+                run('nice git pull')
+                cfg = get('packages.cfg', 'hotfix.cfg')
+                config_parser = ConfigParser(dict_type=OrderedDict)
+                config_parser.read(cfg)
+                egglist = config_parser.get('eggs', 'addon')
+                new_list = egglist + '\n%s' % addonpkg
+                config_parser.set('eggs', 'addon', new_list)
+                #for x in config_parser.sections():
+                #    for name, value in config_parser.items(x):
+                #        print '  %s = %r' % (name, value)
+                with open('hotfix.cfg', 'wb') as configfile:
+                    config_parser.write(configfile)
+                upload_template('hotfix.cfg', filename, backup=False)
+                local('rm hotfix.cfg')
+                run('nice git add %s' % filename)
+                commit = run('nice git commit -m \"%s\"' % msg)
+                if commit.failed:
+                    print 'Could not commit changes to %s' % site
+                else:
+                    run('nice git push')
+                    print 'Egglist for %s successfully updated' % site
 
 
 @task
