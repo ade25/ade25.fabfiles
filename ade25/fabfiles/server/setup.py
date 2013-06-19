@@ -107,7 +107,9 @@ def configure_egg_cache():
     eggcache = '/opt/buildout-cache'
 
     dir_ensure(eggcache)
-    dir_ensure('%s/{downloads,eggs,extends}' % eggcache)
+    dir_ensure('%s/downloads' % eggcache)
+    dir_ensure('%s/eggs' % eggcache)
+    dir_ensure('%s/extends' % eggcache)
     if exists('%s/default.cfg' % eggcache):
         run('rm -rf %s/default.cfg' % eggcache)
 
@@ -141,6 +143,7 @@ def generate_selfsigned_ssl(hostname=None):
     """Generate self-signed SSL certificates and provide them to Nginx."""
     opts = dict(
         hostname=hostname or env.get('hostname') or 'STAR.ade25.de',
+        webserver=env.get('webserver') or '/opt/webserver/buildout.webserver'
     )
 
     if not exists('mkdir etc/certs'):
@@ -152,5 +155,5 @@ def generate_selfsigned_ssl(hostname=None):
     run('openssl rsa -in server.key.password -out server.key')
     run('openssl x509 -req -days 365 '
         '-in server.csr -signkey server.key -out server.crt')
-    run('cp server.crt /etc/nginx/certs/%(hostname)s.crt' % opts)
-    run('cp server.key /etc/nginx/certs/%(hostname)s.key' % opts)
+    run('cp server.crt %(webserver)s/etc/%(hostname)s.crt' % opts)
+    run('cp server.key %(webserver)s/etc/%(hostname)s.key' % opts)
