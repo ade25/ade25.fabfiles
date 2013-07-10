@@ -1,4 +1,7 @@
 from cuisine import dir_ensure
+from cuisine import user_ensure
+from cuisine import group_ensure
+from cuisine import group_user_ensure
 from fabric.api import task, run, env, sudo
 from fabric.contrib.files import exists
 
@@ -40,6 +43,19 @@ def set_system_time(timezone=None):
     sudo('apt-get -yq install ntp')
 
 
+@task
+def set_project_user_and_group(username, groupname):
+    """ Setup project user and group
+
+        @param username: system user for zope process
+        @param groupname: system process group for sites
+    """
+    user_ensure(username)
+    group_ensure(groupname)
+    group_user_ensure(groupname, username)
+
+
+@task
 def install_system_libs(additional_libs=None):
     """Install a bunch of stuff we need for normal operation such as
     ``gcc``, ``rsync``, ``vim``, ``libpng``, etc."""
@@ -51,6 +67,8 @@ def install_system_libs(additional_libs=None):
     run('apt-get update')
     run('apt-get -yq install '
         # tools
+        #'sudo'
+        'vim'
         'gitk '
         'lynx '
         'curl '
