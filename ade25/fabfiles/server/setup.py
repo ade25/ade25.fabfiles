@@ -187,3 +187,21 @@ def configure_global_git_user(username=None, email=None):
     )
     run('git config --global user.name "%(username)s"' % opts)
     run('git config --global user.name "%(email)s"' % opts)
+
+
+@task
+def install_newrelic_monitor(newrelic_key=None):
+    """ Install and configure New Relic sysmond Deamon
+
+        @param key: the new relic licence key
+    """
+    opts = dict(
+        newrelic_key=newrelic_key or env.get('newrelic_key') or ''
+    )
+    run('wget -O /etc/apt/sources.list.d/newrelic.list '
+        'http://download.newrelic.com/debian/newrelic.list')
+    run('apt-key adv --keyserver hkp://subkeys.pgp.net --recv-keys 548C16BF')
+    run('apt-get update')
+    run('apt-get install newrelic-sysmond')
+    run('nrsysmond-config --set license_key=%(newrelic_key)s' % opts)
+    run('/etc/init.d/newrelic-sysmond start')
