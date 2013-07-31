@@ -38,3 +38,24 @@ def reload_supervisor():
     with cd(env.webserver):
         run('bin/supervisorctl reread')
         run('bin/supervisorctl update')
+
+
+@task
+def update():
+    """ Update buildout from git/master """
+    with cd(env.code_root):
+        run('nice git pull')
+
+
+@task
+def build():
+    """ Buildout deployment profile (no update) """
+    with cd(env.code_root):
+        run('bin/buildout -Nc deployment.cfg')
+
+
+@task
+def build_full():
+    """ Buildout deployment profile (full) """
+    with cd(env.code_root):
+        run('bin/buildout -c deployment.cfg')

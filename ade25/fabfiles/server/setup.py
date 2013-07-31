@@ -68,7 +68,7 @@ def install_system_libs(additional_libs=None):
     run('apt-get -yq install '
         # tools
         #'sudo'
-        'vim'
+        'vim '
         'gitk '
         'lynx '
         'curl '
