@@ -19,7 +19,7 @@ def backup():
 def fullbackup():
     """ Database backup full """
     with cd(env.code_root):
-        run('bin/backup')
+        run('bin/fullbackup')
 
 
 @task
@@ -37,7 +37,7 @@ def restore():
 
 
 @task
-def download():
+def download(path=None):
     """ Database download """
 
     if not env.get('confirm'):
@@ -49,14 +49,17 @@ def download():
         if exists('/tmp/Data.fs', use_sudo=True):
             run('rm -rf /tmp/Data.fs')
         # download Data.fs from server
-        run('rsync -a filestorage/Data.fs /tmp/Data.fs')
-        get('/tmp/Data.fs', '%(code_root)s/var/filestorage/Data.fs' % env)
+        run('rsync -a var/filestorage/Data.fs /tmp/Data.fs')
+        tmp = '%(code_user)s@%(hostname)s:/tmp' % env
+        path_fs = '%(local_root)s/var/filestorage/' % env
+        local('rsync -aPz %s/Data.fs %s' % (tmp, path_fs))
+        # get('/tmp/Data.fs', '%(code_root)s/var/filestorage/Data.fs' % env)
         # remove temporary blobs from previous downloads
         if exists('/tmp/blobstorage', use_sudo=True):
             run('rm -rf /tmp/blobstorage')
         # download blobs from server
-        run('rsync -a blobstorage /tmp/')
+        run('rsync -a var/blobstorage /tmp/')
         run('chown -R %(user)s /tmp/blobstorage' % env)
         tmp_loc = '%(code_user)s@%(hostname)s:/tmp/blobstorage' % env
-        path_bs = '%(code_root)s/var/' % env
+        path_bs = '%(local_root)s/var/' % env
         local('rsync -aPz %s %s' % (tmp_loc, path_bs))
