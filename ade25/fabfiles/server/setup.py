@@ -67,7 +67,7 @@ def install_system_libs(additional_libs=None):
     run('apt-get update')
     run('apt-get -yq install '
         # tools
-        #'sudo'
+        'sudo '
         'vim '
         'gitk '
         'lynx '
@@ -111,6 +111,14 @@ def install_python():
     run('git clone git@github.com:collective/buildout.python.git')
     run('cd buildout.python; python bootstrap.py -d')
     run('cd buildout.python; bin/buildout')
+
+
+@task
+def install_webserver():
+    """ Install Python """
+    run('git clone %s buildout.webserver') % (env.git_repo)
+    run('cd buildout.webserver; ../bin/python bootstrap.py -d')
+    run('cd buildout.webserver; bin/buildout -c deployment.cfg')
 
 
 @task
