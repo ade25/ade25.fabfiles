@@ -116,7 +116,7 @@ def install_python():
 @task
 def install_webserver():
     """ Install Python """
-    run('git clone %s buildout.webserver') % (env.git_repo)
+    run('git clone %s buildout.webserver' % (env.git_repo))
     run('cd buildout.webserver; ../bin/python bootstrap.py -d')
     run('cd buildout.webserver; bin/buildout -c deployment.cfg')
 
