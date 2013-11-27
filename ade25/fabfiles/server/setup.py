@@ -2,7 +2,7 @@ from cuisine import dir_ensure
 from cuisine import user_ensure
 from cuisine import group_ensure
 from cuisine import group_user_ensure
-from fabric.api import task, run, env, sudo
+from fabric.api import task, run, env, sudo, cd
 from fabric.contrib.files import exists
 
 
@@ -102,12 +102,6 @@ def install_system_libs(additional_libs=None):
 @task
 def install_python():
     """ Install Python """
-    # install Distribute
-    # run('apt-get -yq install python2.6-dev')
-    # run('curl -O http://python-distribute.org/distribute_setup.py')
-    # run('python2.6 distribute_setup.py')
-    # run('rm -f distribute*')
-    # install buildout based python
     run('git clone git@github.com:collective/buildout.python.git')
     run('cd buildout.python; python bootstrap.py -d')
     run('cd buildout.python; bin/buildout')
@@ -117,8 +111,16 @@ def install_python():
 def install_webserver():
     """ Install Python """
     run('git clone %s buildout.webserver' % (env.git_repo))
-    run('cd buildout.webserver; ../bin/python bootstrap.py -d')
+    run('cd buildout.webserver; ../bin/python bootstrap.py -c deployment.cfg')
     run('cd buildout.webserver; bin/buildout -c deployment.cfg')
+
+
+@task
+def setup_webserver_autostart():
+    """ Install runlevel runscript for supervisord """
+    with cd('/etc/init.d/'):
+        run('ln -s %s/bin/runscript %s-supervisord' % (env.webserver, env.host))
+        run('update-rc.d %s-supervisord defaults' % (env.host))
 
 
 @task
@@ -208,7 +210,7 @@ def install_newrelic_monitor(newrelic_key=None):
     )
     run('wget -O /etc/apt/sources.list.d/newrelic.list '
         'http://download.newrelic.com/debian/newrelic.list')
-    run('apt-key adv --keyserver hkp://subkeys.pgp.net --recv-keys 548C16BF')
+    run('wget -O- https://download.newrelic.com/548C16BF.gpg | apt-key add -')
     run('apt-get update')
     run('apt-get install newrelic-sysmond')
     run('nrsysmond-config --set license_key=%(newrelic_key)s' % opts)
