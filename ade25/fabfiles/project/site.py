@@ -23,6 +23,13 @@ def build_full():
 
 
 @task
+def restart_zope():
+    """ Restart zope instance directly """
+    with cd(env.code_root):
+        run('bin/instance restart')
+
+
+@task
 def restart():
     """ Restart instance """
     with cd(env.webserver):
