@@ -26,6 +26,7 @@ setup(name='ade25.fabfiles',
           'setuptools',
           'Fabric',
           'cuisine',
+          'slacker',
           # -*- Extra requirements: -*-
       ],
       entry_points="""
