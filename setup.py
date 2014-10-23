@@ -7,12 +7,12 @@ setup(name='ade25.fabfiles',
       version=version,
       description="Fabric automation",
       long_description=open("README.txt").read() + "\n" +
-                       open(os.path.join("docs", "HISTORY.txt")).read(),
+      open(os.path.join("docs", "HISTORY.txt")).read(),
       # Get more strings from
       # http://pypi.python.org/pypi?:action=list_classifiers
       classifiers=[
-        "Programming Language :: Python",
-        ],
+          "Programming Language :: Python",
+      ],
       keywords='Python Fabric',
       author='Ade 25',
       author_email='devops@ade25.de',
@@ -23,9 +23,10 @@ setup(name='ade25.fabfiles',
       include_package_data=True,
       zip_safe=False,
       install_requires=[
-          'setuptools',
           'Fabric',
           'cuisine',
+          'setuptools',
+          'slacker',
           # -*- Extra requirements: -*-
       ],
       entry_points="""
