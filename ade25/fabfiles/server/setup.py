@@ -90,6 +90,7 @@ def install_system_libs(additional_libs=None):
         'libssl-dev '
         'libxml2-dev '
         'libxslt-dev '
+        'libffi-dev '
         'pkg-config '
         'zlib1g-dev '
         'poppler-utils '
@@ -118,7 +119,8 @@ def install_webserver():
 def setup_webserver_autostart():
     """ Install runlevel runscript for supervisord """
     with cd('/etc/init.d/'):
-        run('ln -s %s/bin/runscript %s-supervisord' % (env.webserver, env.host))
+        run('ln -s %s/bin/runscript %s-supervisord' % (env.webserver,
+            env.host))
         run('ln -s %s/bin/supervisorctl supervisorctl' % (env.webserver))
         run('update-rc.d %s-supervisord defaults' % (env.host))
 
