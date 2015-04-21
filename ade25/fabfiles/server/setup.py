@@ -78,7 +78,7 @@ def install_system_libs(additional_libs=None):
         'telnet '
         'build-essential '
         'python-software-properties '  # to get add-apt-repositories command
-
+        'python-docutils '
         # imaging, fonts, compression, encryption, etc.
         'libbz2-dev '
         'libfreetype6-dev '
