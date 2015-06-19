@@ -6,6 +6,7 @@ from fabric.api import run
 from fabric.api import cd
 from fabric.contrib.console import confirm
 from fabric.contrib.files import exists
+from fabric.contrib import project
 
 
 @task
@@ -43,23 +44,15 @@ def download(path=None):
     if not env.get('confirm'):
         confirm("This will destroy all current Zope data on your local "
                 " machine. Are you sure you want to continue?")
-
-    with cd(env.code_root):
-        # remove temporary Data.fs file from previous downloads
-        if exists('/tmp/Data.fs', use_sudo=True):
-            run('rm -rf /tmp/Data.fs')
-        # download Data.fs from server
-        run('rsync -a var/filestorage/Data.fs /tmp/Data.fs')
-        tmp = '%(code_user)s@%(hostname)s:/tmp' % env
-        path_fs = '%(local_root)s/var/filestorage/' % env
-        local('rsync -aPz %s/Data.fs %s' % (tmp, path_fs))
-        # get('/tmp/Data.fs', '%(code_root)s/var/filestorage/Data.fs' % env)
-        # remove temporary blobs from previous downloads
-        if exists('/tmp/blobstorage', use_sudo=True):
-            run('rm -rf /tmp/blobstorage')
-        # download blobs from server
-        run('rsync -a var/blobstorage /tmp/')
-        run('chown -R %(user)s /tmp/blobstorage' % env)
-        tmp_loc = '%(code_user)s@%(hostname)s:/tmp/blobstorage' % env
-        path_bs = '%(local_root)s/var/' % env
-        local('rsync -aPz %s %s' % (tmp_loc, path_bs))
+    project.rsync_project(
+        remote_dir='{0}/var/filestorage/Data.fs'.format(env.code_root),
+        local_dir="./var/filestorage/",
+        upload=False,
+        exclude=['*.tmp', '*.index', '*.old', '*.lock']
+        )
+    project.rsync_project(
+        remote_dir='{0}/var/blobstorage/'.format(env.code_root),
+        local_dir="./var/blobstorage/",
+        upload=False,
+        exclude=['*.layout']
+        )
