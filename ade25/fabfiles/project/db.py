@@ -1,11 +1,10 @@
+# -*- coding: utf-8 -*-
+"""Module providing database management tasks"""
 from fabric.api import env
 from fabric.api import task
-from fabric.api import local
-from fabric.api import get
 from fabric.api import run
 from fabric.api import cd
 from fabric.contrib.console import confirm
-from fabric.contrib.files import exists
 from fabric.contrib import project
 
 
@@ -55,4 +54,14 @@ def download(path=None):
         local_dir="./var/blobstorage/",
         upload=False,
         exclude=['*.layout']
+        )
+
+
+@task
+def get_secrets():
+    """  Download secrets.cfg from production environment """
+    project.rsync_project(
+        remote_dir='{0}/secret.cfg'.format(env.code_root),
+        local_dir="./secret.cfg",
+        upload=False,
         )
