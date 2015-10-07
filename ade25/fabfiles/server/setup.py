@@ -130,6 +130,15 @@ def setup_webserver_autostart():
         run('ln -s %s/bin/supervisorctl supervisorctl' % (env.webserver))
         run('update-rc.d %s-supervisord defaults' % (env.host))
 
+@task
+def setup_firewall():
+    """ Setup firewall and block everything but SSH and HTTP(S) """
+    run('apt-get install ufw')
+    run('ufw limit 22/tcp')
+    run('ufw limit 22222/tcp')
+    run('ufw allow 80/tcp')
+    run('ufw allow 443/tcp')
+    run('ufw enable')
 
 @task
 def generate_virtualenv(version='2.7', sitename=None):
