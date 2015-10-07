@@ -14,6 +14,17 @@ from fabric.contrib.files import contains
 
 
 @task
+def close_firewall():
+    """ Setup firewall and block everything but SSH and HTTP(S) """
+    run('apt-get install ufw')
+    run('ufw limit 22/tcp')
+    run('ufw limit 22222/tcp')
+    run('ufw allow 80/tcp')
+    run('ufw allow 443/tcp')
+    run('ufw enable')
+
+
+@task
 def process_hotfix(addon=None):
     """ Process hotfix for all hosted sites """
     idx = 0
