@@ -102,9 +102,15 @@ def install_system_libs(additional_libs=None):
 @task
 def install_python():
     """ Install Python """
-    run('git clone git@github.com:collective/buildout.python.git')
-    run('cd buildout.python; python bootstrap.py -d')
-    run('cd buildout.python; bin/buildout')
+    with cd('/opt'):
+        run('wget https://bootstrap.pypa.io/get-pip.py')
+        run('python get-pip.py')
+        run('pip install virtualenv')
+        run('git clone git@github.com:collective/buildout.python.git')
+        with cd('/opt/buildout.python'):
+            run('virtualenv .')
+            run('bin/pip install zc.buildout')
+            run('bin/buildout')
 
 
 @task
