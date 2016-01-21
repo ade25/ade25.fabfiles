@@ -65,10 +65,8 @@ def prepare_sites():
                     run('touch .gitkeep')
                     append('.gitkeep', '# make non empty dir')
                 with cd('./parts/instance/etc'):
-                    append(
-                        'zope.conf',
-                        'products /Users/cb/dev/hfph/products'
-                    )
+                    product_dir = 'products {0}/products'.format(location)
+                    run('echo -e "\n{0}" >> zope.conf'.format(product_dir))
                 with cd(env.webserver):
                     run('bin/supervisorctl restart instance-{0}'.format(site))
         print('Please fix the project buildouts to include products dir')
