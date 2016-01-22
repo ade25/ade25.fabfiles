@@ -30,6 +30,13 @@ def snapshotbackup():
 
 
 @task
+def zipbackup():
+    """ Database backup zipped """
+    with cd(env.code_root):
+        run('bin/zipbackup')
+
+
+@task
 def restore():
     """ Database backup restore """
     with cd(env.code_root):
@@ -48,13 +55,13 @@ def download(path=None):
         local_dir="./var/filestorage/",
         upload=False,
         exclude=['*.tmp', '*.index', '*.old', '*.lock']
-        )
+    )
     project.rsync_project(
         remote_dir='{0}/var/blobstorage/'.format(env.code_root),
         local_dir="./var/blobstorage/",
         upload=False,
         exclude=['*.layout']
-        )
+    )
 
 
 @task
@@ -64,4 +71,4 @@ def get_secrets():
         remote_dir='{0}/secret.cfg'.format(env.code_root),
         local_dir="./secret.cfg",
         upload=False,
-        )
+    )
