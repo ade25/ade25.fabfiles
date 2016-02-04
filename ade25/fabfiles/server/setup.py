@@ -2,8 +2,10 @@ from cuisine import dir_ensure
 from cuisine import user_ensure
 from cuisine import group_ensure
 from cuisine import group_user_ensure
-from fabric.api import task, run, env, sudo, cd
+from fabric.api import task, run, env, sudo
 from fabric.contrib.files import exists
+from fabric.api import cd
+from fabric.contrib.console import confirm
 
 
 # General error handler needed to catch misisng variables
@@ -234,3 +236,22 @@ def install_newrelic_monitor(newrelic_key=None):
     run('apt-get install newrelic-sysmond')
     run('nrsysmond-config --set license_key=%(newrelic_key)s' % opts)
     run('/etc/init.d/newrelic-sysmond start')
+
+
+@task
+def provision():
+    """ Provision new machine
+
+    This task should only ever be run once when provisioning a new
+    physical machine. Particular errors caused by subtasks will cause
+    the process to abort and the server will be left in an inconsistent
+    state. Please take note of the specific error message in the console
+    """
+    configure_fs()
+    set_project_user_and_group('www', 'www')
+    install_system_libs()
+    install_python_tools()
+    configure_egg_cache()
+    install_webserver()
+    setup_webserver_autostart()
+    setup_firewall()
