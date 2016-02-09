@@ -2,8 +2,10 @@ from cuisine import dir_ensure
 from cuisine import user_ensure
 from cuisine import group_ensure
 from cuisine import group_user_ensure
-from fabric.api import task, run, env, sudo, cd
+from fabric.api import task, run, env, sudo
 from fabric.contrib.files import exists
+from fabric.api import cd
+from fabric.contrib.console import confirm
 
 
 # General error handler needed to catch misisng variables
@@ -81,16 +83,17 @@ def install_system_libs(additional_libs=None):
         'python-docutils '
         # imaging, fonts, compression, encryption, etc.
         'libbz2-dev '
+        'libffi-dev '
         'libfreetype6-dev '
         'libjpeg-dev '
         'libldap-dev '
+        'libncurses5-dev '
         'libpcre3-dev '
         'libreadline-dev '
         'libsasl2-dev '
         'libssl-dev '
         'libxml2-dev '
         'libxslt-dev '
-        'libffi-dev '
         'pkg-config '
         'zlib1g-dev '
         'poppler-utils '
@@ -100,25 +103,24 @@ def install_system_libs(additional_libs=None):
 
 
 @task
-def install_python():
+def install_python_tools():
     """ Install Python """
-    with cd('/opt'):
-        run('wget https://bootstrap.pypa.io/get-pip.py')
-        run('python get-pip.py')
-        run('pip install virtualenv')
-        run('git clone git@github.com:collective/buildout.python.git')
-        with cd('/opt/buildout.python'):
-            run('virtualenv .')
-            run('bin/pip install zc.buildout')
-            run('bin/buildout')
+    run('apt-get install python-dev')
+    run('wget https://bootstrap.pypa.io/get-pip.py')
+    run('python get-pip.py')
+    run('pip install virtualenv')
 
 
 @task
 def install_webserver():
     """ Install Python """
-    run('git clone %s buildout.webserver' % (env.git_repo))
-    run('cd buildout.webserver; ../bin/python bootstrap.py -c deployment.cfg')
-    run('cd buildout.webserver; bin/buildout -c deployment.cfg')
+    dir_ensure('/opt/webserver')
+    with cd('/opt/webserver'):
+        run('git clone %s buildout.webserver' % (env.git_repo))
+    with cd('/opt/webserver/buildout.webserver'):
+        run('virtualenv .')
+        run('bin/pip install zc.buildout')
+        run('bin/buildout -c deployment.cfg')
 
 
 @task
@@ -130,6 +132,7 @@ def setup_webserver_autostart():
         run('ln -s %s/bin/supervisorctl supervisorctl' % (env.webserver))
         run('update-rc.d %s-supervisord defaults' % (env.host))
 
+
 @task
 def setup_firewall():
     """ Setup firewall and block everything but SSH and HTTP(S) """
@@ -139,6 +142,7 @@ def setup_firewall():
     run('ufw allow 80/tcp')
     run('ufw allow 443/tcp')
     run('ufw enable')
+
 
 @task
 def generate_virtualenv(version='2.7', sitename=None):
@@ -173,14 +177,14 @@ def configure_egg_cache():
 
     # force maintenance users to also use default.cfg
     # (needed when running buildout via Fabric)
-    for user in env.admins:
-        dir_ensure('/home/%s/.buildout' % user)
-        if exists('/home/%s/.buildout/default.cfg' % user):
-            run('rm -rf /home/%s/.buildout/default.cfg' % user)
-
-        run('ln -s %s/default.cfg /home/%s/.buildout/default.cfg' % (eggcache,
-            user))
-        run('chown -R %s /home/%s/.buildout' % (user, user))
+    # for user in env.admins:
+    #    dir_ensure('/home/%s/.buildout' % user)
+    #    if exists('/home/%s/.buildout/default.cfg' % user):
+    #        run('rm -rf /home/%s/.buildout/default.cfg' % user)
+#
+    #    run('ln -s %s/default.cfg /home/%s/.buildout/default.cfg' % (eggcache,
+    #        user))
+    #    run('chown -R %s /home/%s/.buildout' % (user, user))
 
 
 @task
@@ -232,3 +236,22 @@ def install_newrelic_monitor(newrelic_key=None):
     run('apt-get install newrelic-sysmond')
     run('nrsysmond-config --set license_key=%(newrelic_key)s' % opts)
     run('/etc/init.d/newrelic-sysmond start')
+
+
+@task
+def provision():
+    """ Provision new machine
+
+    This task should only ever be run once when provisioning a new
+    physical machine. Particular errors caused by subtasks will cause
+    the process to abort and the server will be left in an inconsistent
+    state. Please take note of the specific error message in the console
+    """
+    configure_fs()
+    set_project_user_and_group('www', 'www')
+    install_system_libs()
+    install_python_tools()
+    configure_egg_cache()
+    install_webserver()
+    setup_webserver_autostart()
+    setup_firewall()
