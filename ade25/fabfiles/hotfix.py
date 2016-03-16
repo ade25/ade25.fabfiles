@@ -6,11 +6,10 @@ from fabric.api import env
 from fabric.api import task
 from fabric.api import cd
 from fabric.api import run
-from fabric.api import local
 
-from fabric.operations import get
-from fabric.contrib.files import upload_template
-from fabric.contrib.files import contains
+from fabric.contrib.files import append
+from fabric.contrib.files import exists
+from fabric.contrib.project import rsync_project
 
 
 @task
@@ -25,13 +24,13 @@ def close_firewall():
 
 
 @task
-def process_hotfix(addon=None):
+def process_hotfix(path=None):
     """ Process hotfix for all hosted sites """
     idx = 0
     for site in env.hosted_sites:
         apply_hotfix(
             sitename=site,
-            addon=addon
+            path=path
         )
         print 'Processed hotfix for %s' % site
         idx += 1
@@ -39,50 +38,38 @@ def process_hotfix(addon=None):
 
 
 @task
-def apply_hotfix(sitename=None, addon=None):
+def apply_hotfix(sitename=None, path=None):
     """ Hotfix a single site/buildout """
     if sitename is None:
         print('A sitename is required')
     else:
-        path = ('/opt/sites/%s/buildout.%s' % (sitename, sitename))
-        with cd(path):
-            run('bin/buildout -Nc deployment.cfg')
+        remote_path = ('/opt/sites/%s/buildout.%s' % (sitename, sitename))
+        rsync_project(
+            remote_dir='{0}/products/'.format(remote_path),
+            local_dir=path
+        )
 
 
 @task
-def prepare_sites(addonpkg=None, filename='packages.cfg'):
-    """ Add hotfix to eggs parts of all buildouts
-
-        @param addon: Hotfix package name
-        @param filename: configuration file to change
-    """
-    for site in env.site_locations:
-        msg = 'Add %s' % addonpkg
-        with cd(site):
-            if contains('packages.cfg', addonpkg, exact=False):
-                print '%s site already done' % site
+def prepare_sites():
+    """ Add hotfix products directory """
+    for site in env.hosted_sites:
+        print('Prepare {0} for hotfixes'.format(site))
+        location = '/opt/sites/{0}/buildout.{0}'.format(site)
+        with cd(location):
+            if exists('./products'):
+                print '%s site already prepared' % site
             else:
-                run('nice git pull')
-                cfg = get('packages.cfg', 'hotfix.cfg')
-                config_parser = ConfigParser(dict_type=OrderedDict)
-                config_parser.read(cfg)
-                egglist = config_parser.get('eggs', 'addon')
-                new_list = egglist + '\n%s' % addonpkg
-                config_parser.set('eggs', 'addon', new_list)
-                #for x in config_parser.sections():
-                #    for name, value in config_parser.items(x):
-                #        print '  %s = %r' % (name, value)
-                with open('hotfix.cfg', 'wb') as configfile:
-                    config_parser.write(configfile)
-                upload_template('hotfix.cfg', filename, backup=False)
-                local('rm hotfix.cfg')
-                run('nice git add %s' % filename)
-                commit = run('nice git commit -m \"%s\"' % msg)
-                if commit.failed:
-                    print 'Could not commit changes to %s' % site
-                else:
-                    run('nice git push')
-                    print 'Egglist for %s successfully updated' % site
+                run('mkdir products')
+                with cd('products'):
+                    run('touch .gitkeep')
+                    append('.gitkeep', '# make non empty dir')
+                with cd('./parts/instance/etc'):
+                    product_dir = 'products {0}/products'.format(location)
+                    run('echo -e "\n{0}" >> zope.conf'.format(product_dir))
+                with cd(env.webserver):
+                    run('bin/supervisorctl restart instance-{0}'.format(site))
+        print('Please fix the project buildouts to include products dir')
 
 
 @task
