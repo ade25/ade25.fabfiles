@@ -5,7 +5,6 @@ from cuisine import group_user_ensure
 from fabric.api import task, run, env, sudo
 from fabric.contrib.files import exists
 from fabric.api import cd
-from fabric.contrib.console import confirm
 
 
 # General error handler needed to catch misisng variables
@@ -206,6 +205,20 @@ def generate_selfsigned_ssl(hostname=None):
         '-in server.csr -signkey server.key -out server.crt')
     run('cp server.crt %(webserver)s/etc/%(hostname)s.crt' % opts)
     run('cp server.key %(webserver)s/etc/%(hostname)s.key' % opts)
+
+
+@task
+def add_ssl_cert(servername):
+    """ Run letsencrypt commandline client and generate new certificate """
+    cmd = './certbot-auto certonly {0} {1}{2}{3} {4} {5}'.format(
+        '-a webroot',
+        '--webroot-path=',
+        env.webserver,
+        '/htdocs',
+        '-d',
+        servername)
+    with cd('/opt/certbot'):
+        run(cmd)
 
 
 @task
