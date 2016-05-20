@@ -65,6 +65,23 @@ def download(path=None):
 
 
 @task
+def download_backup(path=None):
+    """ Database backup download """
+    project.rsync_project(
+        remote_dir='/opt/backups/{0}/zipbackups/*'.format(env.sitename),
+        local_dir="./var/zipbackups",
+        upload=False,
+        exclude=['*.tmp', '*.old', '*.lock']
+    )
+    project.rsync_project(
+        remote_dir='/opt/backups/{0}/backups/blobzip/*'.format(env.sitename),
+        local_dir="./var/zipblobbackups",
+        upload=False,
+        exclude=['*.layout']
+    )
+
+
+@task
 def get_secrets():
     """  Download secrets.cfg from production environment """
     project.rsync_project(
