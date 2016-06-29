@@ -72,6 +72,7 @@ def install_system_libs(additional_libs=None):
         'vim '
         'gitk '
         'lynx '
+        'bc '
         'curl '
         'rsync '
         'unzip '
