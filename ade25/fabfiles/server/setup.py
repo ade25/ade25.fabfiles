@@ -227,6 +227,7 @@ def add_ssl_cert(servername):
     run(cmd)
 
 
+@task
 def certbot(servername):
     """ Run letsencrypt commandline client and generate new certificate """
     cmd = 'certbot certonly {0} {1}{2}{3} {4} {5}'.format(
