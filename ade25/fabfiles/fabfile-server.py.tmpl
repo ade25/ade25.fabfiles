@@ -29,8 +29,8 @@ env.host_root = '/opt/sites'
 env.local_dir = '${buildout:directory}'
 
 env.hosts = ['${fabric:servername}']
-env.hosted_sites = [
-]
+env.hosted_sites = {
+}
 
 env.hosted_sites_locations = [
 ]
@@ -73,7 +73,6 @@ def prepare_deploy():
     """ Push committed local changes to git """
     local('git push')
 
-
 @task
 def add_site(site_id=None):
     opts = dict(
@@ -98,6 +97,12 @@ def remove_site(site_id=None):
     cmd = r"sed -i '' '/%(replacement)s/s/^/#/g' %(filename)s " % opts
     local(cmd)
     print(red('site{0} has been deactivated'.format(site_id)))
+
+
+@task
+def add_cert(servername=None):
+    setup.certbot(servername)
+    setup.certbot('www.{0}'.servername)
 
 
 @task
