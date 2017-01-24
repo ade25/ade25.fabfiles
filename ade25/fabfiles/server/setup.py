@@ -95,7 +95,7 @@ def install_system_libs(additional_libs=None):
         'libreadline-dev '
         'libsasl2-dev '
         'libssl-dev '
-        'libtiff4-dev '
+        'libtiff5-dev '
         'libwebp-dev '
         'libxml2-dev '
         'libxslt-dev '
