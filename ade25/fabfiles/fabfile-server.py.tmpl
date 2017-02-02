@@ -102,7 +102,7 @@ def remove_site(site_id=None):
 @task
 def add_cert(servername=None):
     setup.certbot(servername)
-    setup.certbot('www.{0}'.servername)
+    setup.certbot('www.{0}'.format(servername))
 
 
 @task
