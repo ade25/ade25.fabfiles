@@ -73,6 +73,7 @@ def install_system_libs(additional_libs=None):
         'gitk '
         'lynx '
         'bc '
+        'certbot '
         'curl '
         'rsync '
         'unzip '
@@ -81,23 +82,29 @@ def install_system_libs(additional_libs=None):
         'build-essential '
         'python-software-properties '  # to get add-apt-repositories command
         'python-docutils '
+        'python-tk '
         # imaging, fonts, compression, encryption, etc.
         'libbz2-dev '
         'libffi-dev '
         'libfreetype6-dev '
         'libjpeg-dev '
+        'liblcms2-dev '
         'libldap-dev '
         'libncurses5-dev '
         'libpcre3-dev '
         'libreadline-dev '
         'libsasl2-dev '
         'libssl-dev '
+        'libtiff5-dev '
+        'libwebp-dev '
         'libxml2-dev '
         'libxslt-dev '
         'pkg-config '
-        'zlib1g-dev '
         'poppler-utils '
+        'tcl8.5-dev '
+        'tk8.5-dev '
         'wv '
+        'zlib1g-dev '
         '%(additional_libs)s' % opts
         )
 
@@ -218,8 +225,20 @@ def add_ssl_cert(servername):
         '/htdocs',
         '-d',
         servername)
-    with cd('/opt/certbot'):
-        run(cmd)
+    run(cmd)
+
+
+@task
+def certbot(servername):
+    """ Run letsencrypt commandline client and generate new certificate """
+    cmd = 'certbot certonly {0} {1}{2}{3} {4} {5}'.format(
+        '-a webroot',
+        '--webroot-path=',
+        env.webserver,
+        '/htdocs',
+        '-d',
+        servername)
+    run(cmd)
 
 
 @task

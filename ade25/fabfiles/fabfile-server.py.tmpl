@@ -1,31 +1,36 @@
+import os
 import getpass
 from fabric.api import cd
 from fabric.api import env
 from fabric.api import local
 from fabric.api import run
 from fabric.api import task
+from fabric.colors import green
+from fabric.colors import red
 
 from ade25.fabfiles import project
+from ade25.fabfiles.server import setup
 from ade25.fabfiles.server import controls
 from ade25.fabfiles import hotfix as hf
 
 from slacker import Slacker
-slack = Slacker('xoxp-2440800772-2440800774-2520374751-468e84')
+slack = Slacker('${settings:slack-api-token}')
 
 env.use_ssh_config = True
 env.forward_agent = True
 env.port = '22222'
 env.user = 'root'
-env.hostname = '${fabric:hostname}'
+env.hostname = '${fabric:host}'
 env.code_user = 'root'
 env.prod_user = 'www'
 env.webserver = '/opt/webserver/buildout.webserver'
 env.code_root = '/opt/webserver/buildout.webserver'
 env.host_root = '/opt/sites'
+env.local_dir = '${buildout:directory}'
 
-env.hosts = ['${fabric:hostname}']
-env.hosted_sites = [
-]
+env.hosts = ['${fabric:servername}']
+env.hosted_sites = {
+}
 
 env.hosted_sites_locations = [
 ]
@@ -68,6 +73,37 @@ def prepare_deploy():
     """ Push committed local changes to git """
     local('git push')
 
+@task
+def add_site(site_id=None):
+    opts = dict(
+        filename=os.path.join(
+            env.local_dir, 'buildout.d', 'templates', 'nginx.conf'
+        ),
+        replacement='site{0}.conf;'.format(site_id)
+    )
+    cmd = r"sed -i '' '/%(replacement)s/s/^#*//g' %(filename)s " % opts
+    local(cmd)
+    print(green('site{0} has been activated'.format(site_id)))
+
+
+@task
+def remove_site(site_id=None):
+    opts = dict(
+        filename=os.path.join(
+            env.local_dir, 'buildout.d', 'templates', 'nginx.conf'
+        ),
+        replacement='site{0}.conf;'.format(site_id)
+    )
+    cmd = r"sed -i '' '/%(replacement)s/s/^/#/g' %(filename)s " % opts
+    local(cmd)
+    print(red('site{0} has been deactivated'.format(site_id)))
+
+
+@task
+def add_cert(servername=None):
+    setup.certbot(servername)
+    setup.certbot('www.{0}'.format(servername))
+
 
 @task
 def deploy(actor=None):
@@ -80,7 +116,7 @@ def deploy(actor=None):
     with cd(env.webserver):
         run('bin/supervisorctl reread')
         run('bin/supervisorctl update')
-    msg = '[${fabric:hostname}] ${fabric:hostname}.ade25.de server configuration deployed by %(actor)s' % opts
+    msg = '[${fabric:host}] ${fabric:servername} server configuration deployed by %(actor)s' % opts
     user = 'fabric'
     icon = ':shipit:'
     slack.chat.post_message('#general', msg, username=user, icon_emoji=icon)
@@ -99,7 +135,7 @@ def update(sitename=None, actor=None):
         run('nice bin/buildout -Nc deployment.cfg')
     with cd(env.webserver):
         run('nice bin/supervisorctl restart instance-%(sitename)s' % opts)
-    msg = '[${fabric:hostname}] %(sitename)s deployed by %(actor)s' % opts
+    msg = '[${fabric:host}] %(sitename)s deployed by %(actor)s' % opts
     user = 'fabric'
     icon = ':shipit:'
     slack.chat.post_message('#general', msg, username=user, icon_emoji=icon)
