@@ -91,7 +91,7 @@ def deploy(actor=None):
     msg = '[%(hostname)s] *%(sitename)s* deployed by %(actor)s' % opts
     user = 'fabric'
     icon = ':shipit:'
-    slack.chat.post_message('#general', msg, username=user, icon_emoji=icon)
+    slack.chat.post_message('#development', msg, username=user, icon_emoji=icon)
 
 
 @task
@@ -108,7 +108,7 @@ def deploy_full(actor=None):
     msg = '[%(hostname)s] *%(sitename)s* deployed by %(actor)s' % opts
     user = 'fabric'
     icon = ':shipit:'
-    slack.chat.post_message('#general', msg, username=user, icon_emoji=icon)
+    slack.chat.post_message('#development', msg, username=user, icon_emoji=icon)
 
 
 @task
@@ -125,7 +125,7 @@ def rebuild(actor=None):
     msg = '[%(hostname)s] *%(sitename)s* rebuild by %(actor)s' % opts
     user = 'fabric'
     icon = ':shipit:'
-    slack.chat.post_message('#general', msg, username=user, icon_emoji=icon)
+    slack.chat.post_message('#development', msg, username=user, icon_emoji=icon)
 
 
 @task

@@ -73,6 +73,7 @@ def install_system_libs(additional_libs=None):
         'gitk '
         'lynx '
         'bc '
+        'certbot '
         'curl '
         'rsync '
         'unzip '
@@ -94,7 +95,7 @@ def install_system_libs(additional_libs=None):
         'libreadline-dev '
         'libsasl2-dev '
         'libssl-dev '
-        'libtiff4-dev '
+        'libtiff5-dev '
         'libwebp-dev '
         'libxml2-dev '
         'libxslt-dev '
@@ -227,6 +228,7 @@ def add_ssl_cert(servername):
     run(cmd)
 
 
+@task
 def certbot(servername):
     """ Run letsencrypt commandline client and generate new certificate """
     cmd = 'certbot certonly {0} {1}{2}{3} {4} {5}'.format(
