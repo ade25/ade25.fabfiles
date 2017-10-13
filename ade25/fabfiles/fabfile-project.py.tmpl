@@ -30,7 +30,7 @@ env.actor = ${settings:username}
 
 env.roledefs = {
     'production': ['${fabric:host}'],
-    'staging': ['z3']
+    'staging': ['${fabric:host_staging}']
 }
 
 
@@ -48,7 +48,7 @@ def deploy_staging(actor=None):
     msg = '[%(hostname)s] *%(sitename)s* staged by %(actor)s' % opts
     user = 'fabric'
     icon = ':ship:'
-    slack.chat.post_message('#general', msg, username=user, icon_emoji=icon)
+    slack.chat.post_message('#development', msg, username=user, icon_emoji=icon)
 
 
 @task
@@ -65,7 +65,7 @@ def deploy(actor=None):
     msg = '[%(hostname)s] *%(sitename)s* deployed by %(actor)s' % opts
     user = 'fabric'
     icon = ':shipit:'
-    slack.chat.post_message('#general', msg, username=user, icon_emoji=icon)
+    slack.chat.post_message('#development', msg, username=user, icon_emoji=icon)
 
 
 @task
@@ -83,7 +83,7 @@ def deploy_full(actor=None):
     msg = '[%(hostname)s] *%(sitename)s* deployed by %(actor)s' % opts
     user = 'fabric'
     icon = ':shipit:'
-    slack.chat.post_message('#general', msg, username=user, icon_emoji=icon)
+    slack.chat.post_message('#development', msg, username=user, icon_emoji=icon)
 
 
 @task
@@ -101,7 +101,7 @@ def rebuild(actor=None):
     msg = '[%(hostname)s] *%(sitename)s* rebuild by %(actor)s' % opts
     user = 'fabric'
     icon = ':shipit:'
-    slack.chat.post_message('#general', msg, username=user, icon_emoji=icon)
+    slack.chat.post_message('#development', msg, username=user, icon_emoji=icon)
 
 
 @task
