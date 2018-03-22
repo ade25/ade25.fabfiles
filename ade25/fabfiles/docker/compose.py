@@ -8,15 +8,21 @@ from fabric.api import task
 def build():
     """ Build docker container """
     build_dir = '{0}/build'.format(api.env.local_root)
-    configuration = '-f docker-compose.yml -f docker-compose.traefik.yml'
-    with api.lcd(build_dir):
-        api.local('docker-compose {0} build'.format(configuration))
+    configuration = '-f {0}/docker-compose.yml'.format(build_dir)
+    traefik = '-f {0}/docker-compose.traefik.yml'.format(build_dir)
+    with api.lcd(api.env.local_root):
+        api.local('docker-compose {0} {1} build'.format(
+            configuration, traefik)
+        )
 
 
 @task
 def run():
     """ Run docker container """
     build_dir = '{0}/build'.format(api.env.local_root)
-    configuration = '-f docker-compose.yml -f docker-compose.traefik.yml'
-    with api.lcd(build_dir):
-        api.local('docker-compose {0} up'.format(configuration))
+    configuration = '-f {0}/docker-compose.yml'.format(build_dir)
+    traefik = '-f {0}/docker-compose.traefik.yml'.format(build_dir)
+    with api.lcd(api.env.local_root):
+        api.local('docker-compose {0} {1} up'.format(
+            configuration, traefik)
+        )
