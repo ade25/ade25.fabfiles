@@ -80,7 +80,7 @@ def install_system_libs(additional_libs=None):
         'screen '
         'telnet '
         'build-essential '
-        'python-software-properties '  # to get add-apt-repositories command
+        # 'python-software-properties '  # to get add-apt-repositories command
         'python-docutils '
         'python-tk '
         # imaging, fonts, compression, encryption, etc.
