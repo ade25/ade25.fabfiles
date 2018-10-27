@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """Module providing database management tasks"""
+from StringIO import StringIO
+from ConfigParser import SafeConfigParser
 from fabric.api import env
 from fabric.api import task
 from fabric.api import run
@@ -89,3 +91,17 @@ def get_secrets():
         local_dir="./secret.cfg",
         upload=False,
     )
+
+
+@task
+def show_secrets():
+    """Copy admin user to clipboard"""
+    path = '{0}/secret.cfg'.format(env.code_root)
+    fd = StringIO()
+    get(path, fd)
+    fd.seek(0)
+    config_parser = SafeConfigParser(allow_no_value=True)
+    config_parser.readfp(fd)
+    secret = config_parser.get('passwords', 'zope-admin')
+    local('echo "{0}" | pbcopy'.format(secret))
+    print('The admin secret is: {0}'.format(secret))
