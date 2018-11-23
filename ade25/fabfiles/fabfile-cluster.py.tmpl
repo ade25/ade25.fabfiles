@@ -1,5 +1,6 @@
 import os
 import getpass
+from cuisine import dir_ensure
 from fabric.api import task
 from fabric.api import cd
 from fabric.api import env
@@ -110,6 +111,8 @@ def production():
 
 @task
 def deploy_setup(*args):
+    """ Deploy setup (should only be run once) """
+    dir_ensure(env.code_root)
     fab_execute(deploy_push_files)
     fab_execute(deploy_apply_files)
     print("-" * 70)
@@ -118,10 +121,27 @@ def deploy_setup(*args):
 
 
 @task
-def develop():
-    """ Update source packages """
-    with cd(env.code_root):
-        run('nice bin/develop up')
+def deploy(actor=None, *args):
+    """ Deploy current master to production server """
+    opts = dict(
+        sitename=env.get('sitename'),
+        hostname=env.get('hostname'),
+        actor=actor or env.get('actor') or getpass.getuser(),
+        branch=env.git.release_branch,
+    )
+    fab_execute(deploy_push_files)
+    fab_execute(deploy_apply_files)
+    if 'develop' in args:
+        project.site.develop()
+    if 'build' in args:
+        project.site.build()
+    if 'rebuild' in args:
+        project.site.build_full()
+    project.cluster.restart_clients()
+    msg = '[%(hostname)s] *%(sitename)s* deployed by %(actor)s' % opts
+    user = 'fabric'
+    icon = ':shipit:'
+    slack.chat.post_message('#development', msg, username=user, icon_emoji=icon)
 
 
 @task
@@ -160,30 +180,6 @@ def ctl(*cmd):
     """Runs an arbitrary supervisorctl command."""
     with cd(env.code_root):
         run('nice bin/supervisorctl ' + ' '.join(cmd))
-
-
-@task
-def deploy(actor=None, *args):
-    """ Deploy current master to production server """
-    opts = dict(
-        sitename=env.get('sitename'),
-        hostname=env.get('hostname'),
-        actor=actor or env.get('actor') or getpass.getuser(),
-        branch=env.git.release_branch,
-    )
-    fab_execute(deploy_push_files)
-    fab_execute(deploy_apply_files)
-    if 'develop' in args:
-        project.site.develop()
-    if 'build' in args:
-        project.site.build()
-    if 'rebuild' in args:
-        project.site.build_full()
-    project.cluster.restart_clients()
-    msg = '[%(hostname)s] *%(sitename)s* deployed by %(actor)s' % opts
-    user = 'fabric'
-    icon = ':shipit:'
-    slack.chat.post_message('#development', msg, username=user, icon_emoji=icon)
 
 
 @task
