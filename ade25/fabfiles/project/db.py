@@ -54,13 +54,13 @@ def download(path=None):
                 " machine. Are you sure you want to continue?")
     project.rsync_project(
         remote_dir='{0}/var/filestorage/Data.fs'.format(env.code_root),
-        local_dir="./var/filestorage/",
+        local_dir="{0}/var/filestorage/".format(env.local_root),
         upload=False,
         exclude=['*.tmp', '*.index', '*.old', '*.lock']
     )
     project.rsync_project(
         remote_dir='{0}/var/blobstorage/'.format(env.code_root),
-        local_dir="./var/blobstorage/",
+        local_dir="{0}/var/blobstorage/".format(env.local_root),
         upload=False,
         exclude=['*.layout']
     )
@@ -71,13 +71,13 @@ def download_backup(path=None):
     """ Database backup download """
     project.rsync_project(
         remote_dir='/opt/backups/{0}/zipbackups/*'.format(env.sitename),
-        local_dir="./var/zipbackups",
+        local_dir="{0}/var/zipbackups".format(env.local_root),
         upload=False,
         exclude=['*.tmp', '*.old', '*.lock']
     )
     project.rsync_project(
         remote_dir='/opt/backups/{0}/backups/blobzip/*'.format(env.sitename),
-        local_dir="./var/zipblobbackups",
+        local_dir="{0}/var/zipblobbackups".format(env.local_root),
         upload=False,
         exclude=['*.layout']
     )
