@@ -112,7 +112,6 @@ def production():
 @task
 def deploy_setup(*args):
     """ Deploy setup (should only be run once) """
-    dir_ensure(env.code_root)
     fab_execute(deploy_push_files)
     fab_execute(deploy_apply_files)
     print("-" * 70)
