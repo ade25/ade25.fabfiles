@@ -189,7 +189,7 @@ def deploy(*args):
     restart()
     msg = '[%(hostname)s] *%(sitename)s* staged by %(actor)s' % opts
     user = 'fabric'
-    icon = ':ship:'
+    icon = ':shipit:'
     slack.chat.post_message('#development', msg, username=user, icon_emoji=icon)
 
 @task
