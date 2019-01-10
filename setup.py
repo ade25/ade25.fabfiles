@@ -23,7 +23,7 @@ setup(name='ade25.fabfiles',
       include_package_data=True,
       zip_safe=False,
       install_requires=[
-          'Fabric==1.14.0',
+          'Fabric<2.0',
           'cuisine',
           'setuptools',
           'slacker',

@@ -11,7 +11,7 @@ from fabric.api import execute as fab_execute
 from fabric.contrib.console import confirm
 from fabric.contrib import project
 
-#from ade25.fabfiles import project
+from ade25.fabfiles import project as a25_project
 from ade25.fabfiles.server import status
 from ade25.fabfiles.server import controls
 
@@ -133,7 +133,7 @@ def develop():
 @task
 def restart():
     """ Restart instance """
-    project.site.restart()
+    a25_project.site.restart()
 
 
 @task
@@ -167,6 +167,7 @@ def deploy(*args):
     opts = dict(
         sitename=env.get('sitename'),
         actor=env.get('actor') or getpass.getuser(),
+        hostname=env.get('hosts')[0]
     )
     fab_execute(deploy_push_files)
     fab_execute(deploy_apply_files)
