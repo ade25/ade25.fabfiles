@@ -9,6 +9,13 @@ def update():
 
 
 @task
+def develop():
+    """ Update source packages """
+    with cd(env.code_root):
+        run('nice bin/develop up')
+
+
+@task
 def build():
     """ Buildout deployment profile (no update) """
     with cd(env.code_root):
